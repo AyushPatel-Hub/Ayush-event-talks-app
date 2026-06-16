@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes Explorer & Social Share</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Background mesh elements for rich aesthetics -->
+    <div class="mesh-gradient mesh-1"></div>
+    <div class="mesh-gradient mesh-2"></div>
+    <div class="mesh-gradient mesh-3"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-logo">
+                <i class="fa-solid fa-database logo-icon"></i>
+                <div class="logo-text">
+                    <h1>BigQuery</h1>
+                    <span>Release Notes Hub</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <span id="last-updated-text" class="last-updated">Last updated: Loading...</span>
+                <button id="refresh-btn" class="btn btn-primary" title="Refresh Release Notes">
+                    <i class="fa-solid fa-rotate-right refresh-icon" id="refresh-icon"></i>
+                    <span>Refresh</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Layout -->
+        <main class="app-main">
+            <!-- Left Panel: Feed and Filters -->
+            <section class="feed-section">
+                <!-- Search & Filters Container -->
+                <div class="filter-card">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="search-input" placeholder="Search updates by keyword..." autocomplete="off">
+                        <button id="clear-search-btn" class="clear-search-btn" style="display: none;">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="filter-pills-container">
+                        <span class="filter-label">Filter by type:</span>
+                        <div class="filter-pills" id="filter-pills">
+                            <button class="pill active" data-type="all">All</button>
+                            <button class="pill" data-type="feature"><span class="dot dot-feature"></span>Feature</button>
+                            <button class="pill" data-type="change"><span class="dot dot-change"></span>Change</button>
+                            <button class="pill" data-type="issue"><span class="dot dot-issue"></span>Issue</button>
+                            <button class="pill" data-type="breaking"><span class="dot dot-breaking"></span>Breaking</button>
+                            <button class="pill" data-type="announcement"><span class="dot dot-announcement"></span>Announcement</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Release Notes List -->
+                <div class="feed-container">
+                    <div class="feed-loading" id="feed-loading">
+                        <div class="spinner"></div>
+                        <p>Fetching latest updates from Google Cloud...</p>
+                    </div>
+                    <div class="feed-error" id="feed-error" style="display: none;">
+                        <i class="fa-solid fa-triangle-exclamation error-icon"></i>
+                        <h3>Failed to retrieve updates</h3>
+                        <p id="error-message">Connection timed out.</p>
+                        <button id="retry-btn" class="btn btn-secondary mt-3">Try Again</button>
+                    </div>
+                    <div class="feed-empty" id="feed-empty" style="display: none;">
+                        <i class="fa-solid fa-cubes-stacked empty-icon"></i>
+                        <h3>No matches found</h3>
+                        <p>Try refining your search terms or filters.</p>
+                    </div>
+                    <div class="updates-list" id="updates-list" style="display: none;">
+                        <!-- Dynamically populated updates -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Preview and Sharing -->
+            <section class="detail-section">
+                <div class="sticky-detail-container">
+                    <!-- Empty State -->
+                    <div class="detail-empty-state" id="detail-empty-state">
+                        <div class="empty-detail-glow">
+                            <i class="fa-solid fa-paper-plane detail-icon-large"></i>
+                        </div>
+                        <h2>No Update Selected</h2>
+                        <p>Select any specific update from the feed on the left to read its full details and share it on X/Twitter.</p>
+                    </div>
+
+                    <!-- Selected Detail Card -->
+                    <div class="detail-card" id="detail-card" style="display: none;">
+                        <!-- Card Header -->
+                        <div class="detail-card-header">
+                            <div class="detail-meta">
+                                <span id="detail-date" class="detail-date">June 15, 2026</span>
+                                <span id="detail-type" class="pill-badge type-feature">Feature</span>
+                            </div>
+                            <a id="detail-link" href="#" target="_blank" rel="noopener noreferrer" class="detail-source-link" title="Open official release notes page">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Source
+                            </a>
+                        </div>
+
+                        <!-- Card Content -->
+                        <div class="detail-card-body">
+                            <div class="detail-content-html" id="detail-content-html">
+                                <!-- Styled HTML from feed -->
+                            </div>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="detail-divider"></div>
+
+                        <!-- Tweet Composer Section -->
+                        <div class="tweet-composer">
+                            <div class="composer-header">
+                                <h3><i class="fa-brands fa-x-twitter header-x-icon"></i> Tweet Composer</h3>
+                                <span class="composer-subtitle">Customize your share text</span>
+                            </div>
+
+                            <div class="textarea-wrapper">
+                                <textarea id="tweet-textarea" rows="5" placeholder="Draft your tweet here..."></textarea>
+                                <div class="textarea-actions">
+                                    <button id="reset-tweet-btn" class="btn-icon" title="Reset to default templates">
+                                        <i class="fa-solid fa-arrow-rotate-left"></i> Reset
+                                    </button>
+                                    <div class="tweet-templates">
+                                        <button class="template-pill active" data-template="default">Informative</button>
+                                        <button class="template-pill" data-template="hype">Hype</button>
+                                        <button class="template-pill" data-template="short">Minimal</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Composer Footer -->
+                            <div class="composer-footer">
+                                <div class="char-counter-container">
+                                    <div class="progress-ring-container">
+                                        <svg class="progress-ring" width="36" height="36">
+                                            <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.08)" stroke-width="3" fill="transparent" r="14" cx="18" cy="18"/>
+                                            <circle class="progress-ring__circle" id="char-progress" stroke="#00f2fe" stroke-width="3" fill="transparent" r="14" cx="18" cy="18"/>
+                                        </svg>
+                                        <span id="char-count" class="char-count">280</span>
+                                    </div>
+                                    <span id="char-warning-msg" class="char-warning-msg"></span>
+                                </div>
+                                <button id="tweet-btn" class="btn btn-x-twitter">
+                                    <i class="fa-brands fa-x-twitter"></i>
+                                    <span>Post on X</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check toast-icon" id="toast-icon"></i>
+        <span id="toast-message" class="toast-message">Updates refreshed successfully!</span>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
